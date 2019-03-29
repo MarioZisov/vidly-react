@@ -2,20 +2,21 @@ import React, { Component } from "react";
 import { getMovies } from "../services/fakeMovieService";
 import Like from "./like";
 import Pagination from "./pagination";
+import { paginate } from "../utils/paginate";
 
 export default class Movies extends Component {
+
   state = {
     movies: getMovies(),
-    pagesCount: 1,
     currentPage: 1,
-    moviesPerPage: 3
+    pageSize: 3
   };
 
   render() {
     const { length: count } = this.state.movies;
-    this.state.pagesCount = Math.ceil(count / this.state.moviesPerPage);
-
     if (count === 0) return <p>No movies in the database.</p>;
+
+    const movies = paginate(this.state.movies, this.state.currentPage, this.state.pageSize)
 
     return (
       <React.Fragment>
@@ -42,12 +43,7 @@ export default class Movies extends Component {
             </tr>
           </thead>
           <tbody>
-            {this.state.movies
-              .slice(
-                this.state.currentPage * this.state.moviesPerPage -
-                  this.state.moviesPerPage,
-                this.state.currentPage * this.state.moviesPerPage
-              )
+            {movies
               .map(movie => (
                 <tr key={movie._id}>
                   <td>{movie.title}</td>
@@ -73,9 +69,10 @@ export default class Movies extends Component {
           </tbody>
         </table>
         <Pagination
-          pagesCount={this.state.pagesCount}
+          itemsCount={this.state.movies.length}
           currentPage={this.state.currentPage}
-          pageClicked={this.handlePageClick}
+          pageSize={this.state.pageSize}
+          onClick={this.handlePageClick}
         />
       </React.Fragment>
     );
@@ -113,7 +110,5 @@ export default class Movies extends Component {
     this.setState({ currentPage: pageNumber });
   };
 
-  // getPagesCount = () => {
-  //   const pagesCount = this.state.movies.length / 3;
-  // };
+
 }
