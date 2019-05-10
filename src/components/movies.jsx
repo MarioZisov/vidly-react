@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { getMovies } from "../services/fakeMovieService";
 import { getGenres } from "../services/fakeGenreService";
-import Pagination from "./pagination";
+import Pagination from "./common/pagination";
 import { paginate } from "../utils/paginate";
-import ListGroup from "./listGroup";
+import ListGroup from "./common/listGroup";
 import MoviesTable from "./moviesTable";
 import _ from "lodash";
 
@@ -27,7 +27,7 @@ export default class Movies extends Component {
     });
   }
 
-  render() {
+  getPagedData = () => {
     let filtered =
       this.state.selectedGenre && this.state.selectedGenre._id
         ? this.state.movies.filter(
@@ -43,16 +43,18 @@ export default class Movies extends Component {
         )
       : filtered;
 
-    let message = `Showing ${filtered.length} ${
-      filtered.length > 1 ? "movies" : "movie"
-    } id the database.`;
-    if (filtered.length === 0) message = "No movies in the database.";
+    return sorted;
+  };
 
-    const movies = paginate(
-      sorted,
-      this.state.currentPage,
-      this.state.pageSize
-    );
+  render() {
+    let data = this.getPagedData();
+
+    let message = `Showing ${data.length} ${
+      data.length > 1 ? "movies" : "movie"
+    } id the database.`;
+    if (data.length === 0) message = "No movies in the database.";
+
+    const movies = paginate(data, this.state.currentPage, this.state.pageSize);
 
     return (
       <React.Fragment>
@@ -76,7 +78,7 @@ export default class Movies extends Component {
               onSort={this.handleSort}
             />
             <Pagination
-              itemsCount={filtered.length}
+              itemsCount={data.length}
               currentPage={this.state.currentPage}
               pageSize={this.state.pageSize}
               onClick={this.handlePageClick}
